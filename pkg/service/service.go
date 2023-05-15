@@ -1,6 +1,6 @@
 package service
 
-import "notes/pkg/repository"
+import "todo/pkg/repository"
 
 type Authorization interface {
 }
