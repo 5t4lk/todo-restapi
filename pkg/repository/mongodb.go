@@ -2,10 +2,10 @@ package repository
 
 import (
 	"context"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"go.mongodb.org/mongo-driver/mongo/readpref"
-	"log"
 	"time"
 )
 
@@ -33,7 +33,7 @@ func (conn *DBConnection) Ping() error {
 	if err := conn.client.Ping(conn.ctx, readpref.Primary()); err != nil {
 		return err
 	}
-	log.Print("Connected successfully")
+	logrus.Print("Connected successfully")
 
 	return nil
 }

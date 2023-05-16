@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/joho/godotenv"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
-	"log"
 	"os"
 	"todo"
 	"todo/pkg/handler"
@@ -12,17 +12,19 @@ import (
 )
 
 func main() {
+	logrus.SetFormatter(new(logrus.JSONFormatter))
+
 	if err := initConfig(); err != nil {
-		log.Fatalf("error occured while initializating config: %s", err)
+		logrus.Fatalf("error occured while initializating config: %s", err)
 	}
 
 	if err := godotenv.Load(); err != nil {
-		log.Fatalf("error while loading env variables: %s", err)
+		logrus.Fatalf("error while loading env variables: %s", err)
 	}
 
 	db, err := repository.NewDBConnection(os.Getenv("DB_CONNECT"))
 	if err != nil {
-		log.Fatalf("error occured while initializating database: %s", err)
+		logrus.Fatalf("error occured while initializating database: %s", err)
 	}
 
 	repos := repository.NewRepository(db)
@@ -31,7 +33,7 @@ func main() {
 
 	srv := new(todo_app.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		log.Fatalf("error occured while running http server: %s", err)
+		logrus.Fatalf("error occured while running http server: %s", err)
 	}
 }
 
