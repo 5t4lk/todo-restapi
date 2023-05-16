@@ -1,8 +1,10 @@
 package main
 
 import (
+	"github.com/joho/godotenv"
 	"github.com/spf13/viper"
 	"log"
+	"os"
 	"todo"
 	"todo/pkg/handler"
 	"todo/pkg/repository"
@@ -14,7 +16,16 @@ func main() {
 		log.Fatalf("error occured while initializating config: %s", err)
 	}
 
-	repos := repository.NewRepository()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("error while loading env variables: %s", err)
+	}
+
+	db, err := repository.NewDBConnection(os.Getenv("DB_CONNECT"))
+	if err != nil {
+		log.Fatalf("error occured while initializating database: %s", err)
+	}
+
+	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
