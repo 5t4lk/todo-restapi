@@ -9,7 +9,6 @@ import (
 	"time"
 )
 
-// mongodb+srv://5t4lk:b5rkW0Jpu4OPsW4w@myfit.hxhy05d.mongodb.net/
 type DBConnection struct {
 	client *mongo.Client
 	ctx    context.Context
