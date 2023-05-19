@@ -26,12 +26,13 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("error occured while initializating database: %s", err)
 	}
+	defer db.Close()
 
-	repos := repository.NewRepository(db)
+	repos := repository.NewRepository(db.Client, os.Getenv("DB_NAME"))
 	services := service.NewService(repos)
 	handlers := handler.NewHandler(services)
 
-	srv := new(todo_app.Server)
+	srv := new(todo.Server)
 	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
 		logrus.Fatalf("error occured while running http server: %s", err)
 	}

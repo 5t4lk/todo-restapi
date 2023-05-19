@@ -1,4 +1,4 @@
-package todo_app
+package todo
 
 import (
 	"context"

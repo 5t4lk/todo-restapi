@@ -1,6 +1,12 @@
 package repository
 
+import (
+	"go.mongodb.org/mongo-driver/mongo"
+	"todo"
+)
+
 type Authorization interface {
+	CreateUser(user todo.User) (string, error)
 }
 
 type TodoList interface {
@@ -15,6 +21,12 @@ type Repository struct {
 	TodoItem
 }
 
-func NewRepository(db *DBConnection) *Repository {
-	return &Repository{}
+func NewRepository(client *mongo.Client, dbName string) *Repository {
+	db := client.Database(dbName)
+
+	return &Repository{
+		Authorization: NewAuthMongo(db.Collection("users")),
+		TodoList:      nil,
+		TodoItem:      nil,
+	}
 }

@@ -9,10 +9,18 @@ import (
 	"time"
 )
 
+const (
+	users      = "users"
+	todoLists  = "todo_lists"
+	usersLists = "users_lists"
+	todoItems  = "todo_items"
+	listsItems = "lists_items"
+)
+
 type DBConnection struct {
-	client *mongo.Client
-	ctx    context.Context
-	cancel context.CancelFunc
+	Client *mongo.Client
+	Ctx    context.Context
+	Cancel context.CancelFunc
 }
 
 func NewDBConnection(uri string) (*DBConnection, error) {
@@ -23,14 +31,14 @@ func NewDBConnection(uri string) (*DBConnection, error) {
 	}
 
 	return &DBConnection{
-		client: client,
-		ctx:    ctx,
-		cancel: cancel,
+		Client: client,
+		Ctx:    ctx,
+		Cancel: cancel,
 	}, nil
 }
 
 func (conn *DBConnection) Ping() error {
-	if err := conn.client.Ping(conn.ctx, readpref.Primary()); err != nil {
+	if err := conn.Client.Ping(conn.Ctx, readpref.Primary()); err != nil {
 		return err
 	}
 	logrus.Print("Connected successfully")
@@ -39,17 +47,17 @@ func (conn *DBConnection) Ping() error {
 }
 
 func (conn *DBConnection) Close() {
-	defer conn.cancel()
+	defer conn.Cancel()
 	defer func() {
-		if err := conn.client.Disconnect(conn.ctx); err != nil {
+		if err := conn.Client.Disconnect(conn.Ctx); err != nil {
 			panic(err)
 		}
 	}()
 }
 
 func (conn *DBConnection) Query(dataBase, col string, query, field interface{}) (*mongo.Cursor, error) {
-	collection := conn.client.Database(dataBase).Collection(col)
-	result, err := collection.Find(conn.ctx, query, options.Find().SetProjection(field))
+	collection := conn.Client.Database(dataBase).Collection(col)
+	result, err := collection.Find(conn.Ctx, query, options.Find().SetProjection(field))
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +66,8 @@ func (conn *DBConnection) Query(dataBase, col string, query, field interface{}) 
 }
 
 func (conn *DBConnection) InsertOne(dataBase, col string, doc interface{}) (*mongo.InsertOneResult, error) {
-	collection := conn.client.Database(dataBase).Collection(col)
-	result, err := collection.InsertOne(conn.ctx, doc)
+	collection := conn.Client.Database(dataBase).Collection(col)
+	result, err := collection.InsertOne(conn.Ctx, doc)
 	if err != nil {
 		return nil, err
 	}
@@ -68,8 +76,8 @@ func (conn *DBConnection) InsertOne(dataBase, col string, doc interface{}) (*mon
 }
 
 func (conn *DBConnection) UpdateOne(dataBase, col string, filter, update interface{}) (*mongo.UpdateResult, error) {
-	collection := conn.client.Database(dataBase).Collection(col)
-	result, err := collection.UpdateOne(conn.ctx, filter, update)
+	collection := conn.Client.Database(dataBase).Collection(col)
+	result, err := collection.UpdateOne(conn.Ctx, filter, update)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +85,7 @@ func (conn *DBConnection) UpdateOne(dataBase, col string, filter, update interfa
 	return result, nil
 }
 
-func (conn *DBConnection) Cancel() {
-	conn.cancel()
-	conn.client.Disconnect(conn.ctx)
+func (conn *DBConnection) CancelDB() {
+	conn.Cancel()
+	conn.Client.Disconnect(conn.Ctx)
 }
