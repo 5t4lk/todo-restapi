@@ -11,6 +11,7 @@ type Authorization interface {
 }
 
 type TodoList interface {
+	Create(userId string, list todo.TodoList) (string, error)
 }
 
 type TodoItem interface {
@@ -27,7 +28,7 @@ func NewRepository(client *mongo.Client, dbName string) *Repository {
 
 	return &Repository{
 		Authorization: NewAuthMongo(db.Collection("users")),
-		TodoList:      nil,
+		TodoList:      NewTodoListMongo(db.Collection("todo_lists")),
 		TodoItem:      nil,
 	}
 }
