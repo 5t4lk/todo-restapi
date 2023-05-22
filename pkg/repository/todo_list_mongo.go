@@ -33,12 +33,12 @@ func (r *TodoListMongo) Create(userId string, list todo.TodoList) (string, error
 		return "", err
 	}
 
-	listID, ok := result.InsertedID.(primitive.ObjectID)
+	listId, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
 		return "", errors.New("failed to get inserted ID")
 	}
 
-	return listID.Hex(), nil
+	return listId.Hex(), nil
 }
 
 func (r *TodoListMongo) GetAll(userId string) ([]todo.TodoList, error) {
@@ -54,6 +54,7 @@ func (r *TodoListMongo) GetAll(userId string) ([]todo.TodoList, error) {
 	defer cur.Close(ctx)
 
 	var lists []todo.TodoList
+
 	for cur.Next(ctx) {
 		var list todo.TodoList
 		if err := cur.Decode(&list); err != nil {

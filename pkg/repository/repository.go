@@ -19,6 +19,8 @@ type TodoList interface {
 }
 
 type TodoItem interface {
+	Create(listId string, item todo.TodoItem) (string, error)
+	GetAll(userId, listId string) ([]todo.TodoItem, error)
 }
 
 type Repository struct {
@@ -33,6 +35,6 @@ func NewRepository(client *mongo.Client, dbName string) *Repository {
 	return &Repository{
 		Authorization: NewAuthMongo(db.Collection("users")),
 		TodoList:      NewTodoListMongo(db.Collection("todo_lists")),
-		TodoItem:      nil,
+		TodoItem:      NewTodoItemMongo(db.Collection("todo_items")),
 	}
 }
