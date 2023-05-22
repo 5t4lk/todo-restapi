@@ -22,9 +22,13 @@ func (r *TodoListMongo) Create(userId string, list todo.TodoList) (string, error
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	list.Id = userId
+	doc := map[string]interface{}{
+		"title":       list.Title,
+		"description": list.Description,
+		"user_id":     userId,
+	}
 
-	result, err := r.collection.InsertOne(ctx, list)
+	result, err := r.collection.InsertOne(ctx, doc)
 	if err != nil {
 		return "", err
 	}
@@ -41,7 +45,7 @@ func (r *TodoListMongo) GetAll(userId string) ([]todo.TodoList, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	filter := bson.M{"id": userId}
+	filter := bson.M{"user_id": userId}
 
 	cur, err := r.collection.Find(ctx, filter)
 	if err != nil {
@@ -63,4 +67,29 @@ func (r *TodoListMongo) GetAll(userId string) ([]todo.TodoList, error) {
 	}
 
 	return lists, nil
+}
+
+func (r *TodoListMongo) GetById(userId, listId string) (todo.TodoList, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_id, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return todo.TodoList{}, err
+	}
+
+	filter := bson.M{
+		"_id": _id,
+	}
+
+	var list todo.TodoList
+	err = r.collection.FindOne(ctx, filter).Decode(&list)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return todo.TodoList{}, errors.New("list not found")
+		}
+		return todo.TodoList{}, err
+	}
+
+	return list, nil
 }
