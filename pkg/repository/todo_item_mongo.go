@@ -71,3 +71,84 @@ func (r *todoItemMongo) GetAll(userId, listId string) ([]todo.TodoItem, error) {
 
 	return items, nil
 }
+
+func (r *todoItemMongo) GetById(userId, listId string) (todo.TodoItem, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_id, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return todo.TodoItem{}, err
+	}
+
+	filter := bson.M{
+		"_id": _id,
+	}
+
+	var item todo.TodoItem
+	err = r.collection.FindOne(ctx, filter).Decode(&item)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return todo.TodoItem{}, errors.New("list not found")
+		}
+		return todo.TodoItem{}, err
+	}
+
+	return item, nil
+}
+
+func (r *todoItemMongo) Delete(userId, listId string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_id, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return err
+	}
+
+	filter := bson.M{
+		"_id": _id,
+	}
+
+	_, err = r.collection.DeleteOne(ctx, filter)
+	if err != nil {
+		return errors.New("error occurred while deleting list")
+	}
+
+	return nil
+}
+
+func (r *todoItemMongo) Update(userId, listId string, input todo.UpdateItemInput) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_id, err := primitive.ObjectIDFromHex(listId)
+	if err != nil {
+		return err
+	}
+
+	update := map[string]interface{}{}
+
+	if input.Title != "" {
+		update["title"] = input.Title
+	}
+	if input.Description != "" {
+		update["description"] = input.Description
+	}
+	if input.Done != nil {
+		update["done"] = *input.Done
+	}
+
+	filter := bson.M{
+		"_id": _id,
+	}
+
+	updateQuery := bson.M{"$set": update}
+
+	_, err = r.collection.UpdateOne(ctx, filter, updateQuery)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

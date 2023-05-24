@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
 	"github.com/joho/godotenv"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"todo"
 	"todo/pkg/handler"
 	"todo/pkg/repository"
@@ -33,8 +37,24 @@ func main() {
 	handlers := handler.NewHandler(services)
 
 	srv := new(todo.Server)
-	if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
-		logrus.Fatalf("error occured while running http server: %s", err)
+	go func() {
+		if err := srv.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+			if err != http.ErrServerClosed {
+				logrus.Errorf("error occured while running http server: %s", err)
+			}
+		}
+	}()
+
+	logrus.Println("TodoApp started")
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGTERM, syscall.SIGINT)
+	<-quit
+
+	logrus.Println("TodoApp Shutting Down")
+
+	if err := srv.ShutDown(context.Background()); err != nil {
+		logrus.Errorf("erorr occurred while shutting down server: %s", err.Error())
 	}
 }
 

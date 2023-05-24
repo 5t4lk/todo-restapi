@@ -38,3 +38,16 @@ func (i *UpdateListInput) Validate() error {
 	}
 	return nil
 }
+
+type UpdateItemInput struct {
+	Title       string `json:"title" bson:"title"`
+	Description string `json:"description" bson:"description"`
+	Done        *bool  `json:"done" bson:"done"`
+}
+
+func (i *UpdateItemInput) Validate() error {
+	if i.Title == "" && i.Description == "" && i.Done == nil {
+		return errors.New("request of update structure has no values")
+	}
+	return nil
+}

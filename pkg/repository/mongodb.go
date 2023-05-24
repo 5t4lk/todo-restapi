@@ -38,13 +38,15 @@ func (conn *DBConnection) Ping() error {
 	return nil
 }
 
-func (conn *DBConnection) Close() {
+func (conn *DBConnection) Close() error {
 	defer conn.Cancel()
 	defer func() {
 		if err := conn.Client.Disconnect(conn.Ctx); err != nil {
 			panic(err)
 		}
 	}()
+
+	return nil
 }
 
 func (conn *DBConnection) Query(dataBase, col string, query, field interface{}) (*mongo.Cursor, error) {
