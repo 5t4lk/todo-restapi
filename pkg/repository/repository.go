@@ -36,8 +36,8 @@ func NewRepository(client *mongo.Client, dbName string) *Repository {
 	db := client.Database(dbName)
 
 	return &Repository{
-		Authorization: NewAuthMongo(db.Collection("users")),
-		TodoList:      NewTodoListMongo(db.Collection("todo_lists")),
-		TodoItem:      NewTodoItemMongo(db.Collection("todo_items")),
+		Authorization: NewAuthMongo(db.Collection(dbUsers)),
+		TodoList:      NewTodoListMongo(db.Collection(dbTodoLists)),
+		TodoItem:      NewTodoItemMongo(db.Collection(dbTodoItems)),
 	}
 }

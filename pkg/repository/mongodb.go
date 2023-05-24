@@ -9,6 +9,12 @@ import (
 	"time"
 )
 
+const (
+	dbUsers     = "users"
+	dbTodoLists = "todo_lists"
+	dbTodoItems = "todo_items"
+)
+
 type DBConnection struct {
 	Client *mongo.Client
 	Ctx    context.Context
