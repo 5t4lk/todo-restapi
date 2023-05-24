@@ -1,4 +1,4 @@
-# REST API for creating TODO Lists
+# REST API for creating ToDo Lists
 
 ## Project includes:
 - Developing Web Application following to design of REST API.
